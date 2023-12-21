@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modele des commandes, liée à un utilisateur
+model Order {
+  id  Int @id @default(autoincrement())
+  authorId  Int
+  author  User  @relation(fields: [authorId], references: [id])
+  OrderProduct OrderProduct[]
+}
+
+// Modele des utilisateurs
+model User {
+  id  Int @id @default(autoincrement())
+  email String @unique
+  name String
+  password String
+  order Order[]
+}
+
+// Modele des produits
+model Product {
+  id  Int @id @default(autoincrement())
+  name String
+  price Float
+  OrderProduct OrderProduct[]
+}
+
+// Table pivot entre les commandes et les produits et leur quantité
+model OrderProduct {
+  orderId   Int
+  order     Order @relation(fields: [orderId], references: [id])
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  @@id([orderId, productId])
+}
