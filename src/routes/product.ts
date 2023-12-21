@@ -41,9 +41,9 @@ productRoutes.post("/add", async (req, res) => {
     }
 });
 
-productRoutes.delete("/delete", async (req, res) => {
+productRoutes.delete("/delete/:id", async (req, res) => {
     //Récupérer les données envoyées dans le body de la requête
-    const { id } = req.body;
+    const { id } = req.params;
 
     try {
 
@@ -134,7 +134,7 @@ productRoutes.get("/:id", async (req, res) => {
 
 });
 
-productRoutes.post("/update:id", async (req, res) => {
+productRoutes.patch("/update/:id", async (req, res) => {
     //Récupérer les données envoyées dans le body de la requête
     const { id } = req.params;
 

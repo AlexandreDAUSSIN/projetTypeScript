@@ -46,9 +46,9 @@ userRoutes.post("/add", async (req, res) => {
     }
 });
 
-userRoutes.delete("/delete", async (req, res) => {
+userRoutes.delete("/delete/:id", async (req, res) => {
     //Récupérer les données envoyées dans le body de la requête
-    const { id } = req.body;
+    const { id } = req.params;
 
     try {
 
@@ -152,7 +152,7 @@ userRoutes.get("/:id", async (req, res) => {
 
 });
 
-userRoutes.post("/update:id", async (req, res) => {
+userRoutes.post("/update/:id", async (req, res) => {
     //Récupérer les données envoyées dans le body de la requête
     const { id } = req.params;
 
