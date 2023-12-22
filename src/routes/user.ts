@@ -2,6 +2,8 @@ import express from "express";
 import { User } from "../classes/user";
 import prisma from "../utils/database";
 import bcrypt from 'bcrypt';
+import passport from "passport";
+import { isAdmin } from "../utils/middleware";
 
 // Définir le router
 const userRoutes = express.Router();
@@ -22,6 +24,7 @@ userRoutes.post("/add", async (req, res) => {
               email: email.toString(),
               name: name.toString(),
               password: encryptedPassword,
+              role: UserRole.Client
             },
           });
 
@@ -43,7 +46,7 @@ userRoutes.post("/add", async (req, res) => {
     }
 });
 
-userRoutes.delete("/delete/:id", async (req, res) => {
+userRoutes.delete("/delete/:id", passport.authenticate("jwt", { session: false }), isAdmin, async (req, res) => {
     //Récupérer les données envoyées dans le body de la requête
     const { id } = req.params;
 
@@ -66,9 +69,9 @@ userRoutes.delete("/delete/:id", async (req, res) => {
 
         if(userDeleted) {
             //Retourner une réponse
-            return res.status(201).send("Utilisateur supprimé");
+            return res.status(204).send("Utilisateur supprimé");
         } else {
-            return res.status(400).send("Utilisateur non supprimé");
+            return res.status(500).send("Utilisateur non supprimé");
         }
 
     } catch (error: any) {
@@ -81,14 +84,14 @@ userRoutes.delete("/delete/:id", async (req, res) => {
     }
 });
 
-userRoutes.get("/all", async (req, res) => {
+userRoutes.get("/all", passport.authenticate("jwt", { session: false }), isAdmin, async (req, res) => {
 
     try {
 
         const users = await prisma.user.findMany();
 
         //Retourner une réponse
-        return res.status(201).send(users);
+        return res.status(200).send(users);
 
     } catch (error) {
 
@@ -100,7 +103,7 @@ userRoutes.get("/all", async (req, res) => {
     }
 });
 
-userRoutes.get("/:id", async (req, res) => {
+userRoutes.get("/:id", passport.authenticate("jwt", { session: false }), isAdmin, async (req, res) => {
     //Récupérer les données envoyées dans les paramètres url de la requête
     const { id } = req.params;
 
@@ -135,7 +138,7 @@ userRoutes.get("/:id", async (req, res) => {
 
 });
 
-userRoutes.put("/update/:id", async (req, res) => {
+userRoutes.put("/update/:id", passport.authenticate("jwt", { session: false }), isAdmin, async (req, res) => {
     //Récupérer les données envoyées dans le body de la requête
     const { id } = req.params;
     const { email, name, password } = req.body;
@@ -177,10 +180,10 @@ userRoutes.put("/update/:id", async (req, res) => {
                 //Retourner une réponse
                 return res.status(201).send(udpatedUser);
             } else {
-                return res.status(400).send("L\'utilisateur n\'a pas pu être mis à jour");
+                return res.status(500).send("L\'utilisateur n\'a pas pu être mis à jour");
             }
         } else {
-            return res.status(400).send("L\'utilisateur n\'existe pas encore en base");
+            return res.status(500).send("L\'utilisateur n\'existe pas encore en base");
         }
 
     } catch (error) {

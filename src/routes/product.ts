@@ -1,12 +1,13 @@
 import express from "express";
 import prisma from "../utils/database";
-import { Product } from "../classes/product";
+import passport from "passport";
+import { isManagerOrAdmin } from "../utils/middleware";
 
 // Définir le router
 const productRoutes = express.Router();
 
 //Définir les différentes routes
-productRoutes.post("/add", async (req, res) => {
+productRoutes.post("/add", passport.authenticate("jwt", { session: false }), isManagerOrAdmin, async (req, res) => {
     //Récupérer les données envoyées dans le body de la requête
     const { name, price } = req.body;
 
@@ -28,17 +29,12 @@ productRoutes.post("/add", async (req, res) => {
         //Logger l'erreur
         console.log(error);
 
-        //Conditionné la réponse
-        if (error.code == "11000") {
-            return res.status(409).send('Email address is already in use.');
-        }
-
         return res.status(500).send('Erreur lors de l\'enregistrement en base');
 
     }
 });
 
-productRoutes.delete("/delete/:id", async (req, res) => {
+productRoutes.delete("/delete/:id", passport.authenticate("jwt", { session: false }), isManagerOrAdmin, async (req, res) => {
     //Récupérer les données envoyées dans le body de la requête
     const { id } = req.params;
 
@@ -60,7 +56,7 @@ productRoutes.delete("/delete/:id", async (req, res) => {
         });
 
         //Retourner une réponse
-        return res.status(201).send("Produit supprimés");
+        return res.status(204).send("Produit supprimés");
 
     } catch (error) {
 
@@ -79,7 +75,7 @@ productRoutes.get("/all", async (req, res) => {
         const products = await prisma.product.findMany();
 
         //Retourner une réponse
-        return res.status(201).send(products);
+        return res.status(200).send(products);
 
     } catch (error) {
 
@@ -91,7 +87,7 @@ productRoutes.get("/all", async (req, res) => {
     }
 });
 
-productRoutes.get("/:id", async (req, res) => {
+productRoutes.get("/:id", passport.authenticate("jwt", { session: false }), isManagerOrAdmin, async (req, res) => {
     //Récupérer les données envoyées dans les paramètres url de la requête
     const { id } = req.params;
 
@@ -126,7 +122,7 @@ productRoutes.get("/:id", async (req, res) => {
 
 });
 
-productRoutes.put("/update/:id", async (req, res) => {
+productRoutes.put("/update/:id", passport.authenticate("jwt", { session: false }), isManagerOrAdmin, async (req, res) => {
     //Récupérer les données envoyées dans le body de la requête
     const { id } = req.params;
     const { name, price } = req.body;
@@ -164,10 +160,10 @@ productRoutes.put("/update/:id", async (req, res) => {
                 //Retourner une réponse
                 return res.status(201).send(udpatedProduct);
             } else {
-                return res.status(400).send("Le product n\'a pas pu être mis à jour");
+                return res.status(500).send("Le product n\'a pas pu être mis à jour");
             }
         } else {
-            return res.status(400).send("Le product n\'existe pas encore en base");
+            return res.status(500).send("Le product n\'existe pas encore en base");
         }
 
     } catch (error) {

@@ -1,22 +1,25 @@
 import express from "express";
 import prisma from "../utils/database";
-import { Order } from "../classes/order";
 import { OrderProduct } from "@prisma/client";
+import passport from "passport";
+import { isManagerOrAdmin } from "../utils/middleware";
 
 // Définir le router
 const orderRoutes = express.Router();
 
 //Définir les différentes routes
-orderRoutes.post("/add", async (req, res) => {
+orderRoutes.post("/add", passport.authenticate("jwt", { session: false }), async (req, res) => {
     //Récupérer les données envoyées dans le body de la requête
     const { authorId } = req.body;
 
     try {
 
+        const authorIdInt = parseInt(authorId, 10);
+
         // Ajouter l'order en base de données
         const newOrder = await prisma.order.create({
             data: {
-                authorId: authorId
+                authorId: authorIdInt
             },
         });
 
@@ -33,7 +36,7 @@ orderRoutes.post("/add", async (req, res) => {
     }
 });
 
-orderRoutes.delete("/delete/:id", async (req, res) => {
+orderRoutes.delete("/delete/:id", passport.authenticate("jwt", { session: false }), isManagerOrAdmin, async (req, res) => {
     //Récupérer les données envoyées dans le body de la requête
     const { id } = req.params;
 
@@ -56,9 +59,9 @@ orderRoutes.delete("/delete/:id", async (req, res) => {
 
         if(deleteOrders) {
             //Retourner une réponse
-            return res.status(201).send("Commandes supprimée");
+            return res.status(204).send("Commandes supprimée");
         } else {
-            return res.status(400).send("Commande non supprimée");
+            return res.status(500).send("Commande non supprimée");
         }
 
     } catch (error: any) {
@@ -71,7 +74,7 @@ orderRoutes.delete("/delete/:id", async (req, res) => {
     }
 });
 
-orderRoutes.get("/all", async (req, res) => {
+orderRoutes.get("/all", passport.authenticate("jwt", { session: false }), isManagerOrAdmin, async (req, res) => {
 
     try {
 
@@ -87,7 +90,7 @@ orderRoutes.get("/all", async (req, res) => {
         });
 
         //Retourner une réponse
-        return res.status(201).send(orders);
+        return res.status(200).send(orders);
 
     } catch (error) {
 
@@ -99,7 +102,7 @@ orderRoutes.get("/all", async (req, res) => {
     }
 });
 
-orderRoutes.get("/:id", async (req, res) => {
+orderRoutes.get("/:id", passport.authenticate("jwt", { session: false }), isManagerOrAdmin, async (req, res) => {
     //Récupérer les données envoyées dans les paramètres url de la requête
     const { id } = req.params;
 
@@ -142,7 +145,7 @@ orderRoutes.get("/:id", async (req, res) => {
 
 });
 
-orderRoutes.put("/update/:id", async (req, res) => {
+orderRoutes.put("/update/:id", passport.authenticate("jwt", { session: false }), async (req, res) => {
     //Récupérer les données envoyées dans le body de la requête
     const { id } = req.params;
     const { productId, quantity } : { productId: number, quantity: number} = req.body;
@@ -199,10 +202,10 @@ orderRoutes.put("/update/:id", async (req, res) => {
                 //Retourner une réponse
                 return res.status(201).send("Ajouté à votre commande : " + updatedOrderProduct);
             } else {
-                return res.status(400).send("La commande n\'a pas pu être mis à jour");
+                return res.status(500).send("La commande n\'a pas pu être mis à jour");
             }
         } else {
-            return res.status(400).send("La commande n\'existe pas encore en base");
+            return res.status(500).send("La commande n\'existe pas encore en base");
         }
 
     } catch (error) {

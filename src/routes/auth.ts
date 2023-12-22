@@ -2,10 +2,12 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
 import prisma from "../utils/database";
+import { Request, Response } from 'express';
+import { validateAuthInputs } from "../utils/middleware";
 
 const router = express.Router();
 
-router.post("/signIn", async function (req, res) {
+router.post("/signIn", validateAuthInputs, async function (req: Request, res: Response) {
   const { email, password } = req.body;
   try {
     const user = await prisma.user.findUnique({
@@ -35,7 +37,7 @@ router.post("/signIn", async function (req, res) {
 });
 
 router.post("/signUp", async function (req, res) {
-  const { email, password, name } = req.body;
+  const { email, password, name, role } = req.body;
   try {
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -54,6 +56,7 @@ router.post("/signUp", async function (req, res) {
         email: email,
         password: hashedPassword,
         name: name,
+        role: role,
       },
     });
 

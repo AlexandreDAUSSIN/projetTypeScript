@@ -3,6 +3,7 @@ import userRoutes from "./user";
 import productRoutes from "./product";
 import authRoutes from "./auth";
 import passport from "passport";
+import orderRoutes from "./order";
 
 //Définir le routeur
 const router = express.Router();
@@ -14,7 +15,8 @@ router.get("/", (req, res) => {
 
 router.use("/auth", authRoutes);
 router.use("/user", userRoutes);
-router.use("/product", passport.authenticate("jwt", { session: false }), productRoutes);
+router.use("/product", productRoutes);
+router.use("/order", passport.authenticate("jwt", { session: false }), orderRoutes);
 
 //Exporter le routeur
 export default router;
