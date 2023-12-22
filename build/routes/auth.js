@@ -43,4 +43,34 @@ router.post("/signIn", function (req, res) {
         }
     });
 });
+router.post("/signUp", function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { email, password, name } = req.body;
+        try {
+            const existingUser = yield database_1.default.user.findUnique({
+                where: {
+                    email: email,
+                },
+            });
+            if (existingUser) {
+                return res.status(400).json({ error: "User already exists" });
+            }
+            const hashedPassword = yield bcrypt_1.default.hash(password, 10);
+            const newUser = yield database_1.default.user.create({
+                data: {
+                    email: email,
+                    password: hashedPassword,
+                    name: name,
+                },
+            });
+            const token = jsonwebtoken_1.default.sign({ user: newUser }, process.env.JWT_SECRET, {
+                expiresIn: "1h",
+            });
+            res.json({ token });
+        }
+        catch (e) {
+            res.status(500).json({ error: "Internal server error" });
+        }
+    });
+});
 exports.default = router;

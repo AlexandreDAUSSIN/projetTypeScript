@@ -4,6 +4,7 @@ import express from "express";
 import { rateLimit } from 'express-rate-limit';
 import apiRouter from './routes/api.js';
 import 'dotenv/config';
+import './utils/passport';
 
 async function main() {
 

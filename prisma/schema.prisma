@@ -14,7 +14,7 @@ datasource db {
 model Order {
   id  Int @id @default(autoincrement())
   authorId  Int
-  author  User  @relation(fields: [authorId], references: [id])
+  author  User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
   OrderProduct OrderProduct[]
 }
 
@@ -38,9 +38,9 @@ model Product {
 // Table pivot entre les commandes et les produits et leur quantité
 model OrderProduct {
   orderId   Int
-  order     Order @relation(fields: [orderId], references: [id])
+  order     Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId Int
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity  Int
   @@id([orderId, productId])
 }

@@ -38,15 +38,15 @@ productRoutes.post("/add", (req, res) => __awaiter(void 0, void 0, void 0, funct
         //Logger l'erreur
         console.log(error);
         //Conditionné la réponse
-        // if (error.code === 11000) {
-        //     return res.status(409).send('Email address is already in use.');
-        // }
+        if (error.code == "11000") {
+            return res.status(409).send('Email address is already in use.');
+        }
         return res.status(500).send('Erreur lors de l\'enregistrement en base');
     }
 }));
-productRoutes.delete("/delete", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+productRoutes.delete("/delete/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //Récupérer les données envoyées dans le body de la requête
-    const { id } = req.body;
+    const { id } = req.params;
     try {
         // Convertir l'id de l'url en nombre
         const productId = parseInt(id, 10);
@@ -66,10 +66,6 @@ productRoutes.delete("/delete", (req, res) => __awaiter(void 0, void 0, void 0, 
     catch (error) {
         //Logger l'erreur
         console.log(error);
-        //Conditionné la réponse
-        // if (error.code === 11000) {
-        //     return res.status(409).send('Email address is already in use.');
-        // }
         res.status(500).send('Error during user registration');
     }
 }));
@@ -111,9 +107,10 @@ productRoutes.get("/:id", (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.status(500).send('Erreur pendant la récupération du product');
     }
 }));
-productRoutes.post("/update:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+productRoutes.put("/update/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //Récupérer les données envoyées dans le body de la requête
     const { id } = req.params;
+    const { name, price } = req.body;
     try {
         // Convertir l'id de l'url en nombre
         const productId = parseInt(id, 10);
@@ -121,21 +118,21 @@ productRoutes.post("/update:id", (req, res) => __awaiter(void 0, void 0, void 0,
         if (isNaN(productId)) {
             return res.status(400).send('L\'ID doit être un nombre valide');
         }
-        //Rechercher l'user par son id
+        //Rechercher le product par son id
         const product = yield database_1.default.product.findUnique({
             where: {
                 id: productId,
             }
         });
         if (product) {
-            // Update l'utilisateur en base de données
+            // Update le product en base de données
             const udpatedProduct = yield database_1.default.product.update({
                 where: {
                     id: product === null || product === void 0 ? void 0 : product.id,
                 },
                 data: {
-                    name: product.name.toString(),
-                    price: product.price,
+                    name: name.toString(),
+                    price: price,
                 },
             });
             if (udpatedProduct) {
@@ -153,10 +150,6 @@ productRoutes.post("/update:id", (req, res) => __awaiter(void 0, void 0, void 0,
     catch (error) {
         //Logger l'erreur
         console.log(error);
-        //Conditionné la réponse
-        // if (error.code === 11000) {
-        //     return res.status(409).send('Email address is already in use.');
-        // }
         return res.status(500).send('Erreur lors de l\'enregistrement en base');
     }
 }));

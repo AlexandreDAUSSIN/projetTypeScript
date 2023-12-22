@@ -12,29 +12,26 @@ productRoutes.post("/add", async (req, res) => {
 
     try {
 
-        //Créer le product
-        const newProduct = new Product(name, price);
-
         // Ajouter le product en base de données
-        await prisma.product.create({
+        const newProduct = await prisma.product.create({
             data: {
-              name: newProduct.name.toString(),
-              price: newProduct.price,
+              name: name.toString(),
+              price: price,
             },
           });
 
         //Retourner une réponse
         return res.status(201).send(newProduct);
 
-    } catch (error) {
+    } catch (error: any) {
 
         //Logger l'erreur
         console.log(error);
 
         //Conditionné la réponse
-        // if (error.code === 11000) {
-        //     return res.status(409).send('Email address is already in use.');
-        // }
+        if (error.code == "11000") {
+            return res.status(409).send('Email address is already in use.');
+        }
 
         return res.status(500).send('Erreur lors de l\'enregistrement en base');
 
@@ -69,11 +66,6 @@ productRoutes.delete("/delete/:id", async (req, res) => {
 
         //Logger l'erreur
         console.log(error);
-
-        //Conditionné la réponse
-        // if (error.code === 11000) {
-        //     return res.status(409).send('Email address is already in use.');
-        // }
 
         res.status(500).send('Error during user registration');
 
@@ -134,9 +126,10 @@ productRoutes.get("/:id", async (req, res) => {
 
 });
 
-productRoutes.patch("/update/:id", async (req, res) => {
+productRoutes.put("/update/:id", async (req, res) => {
     //Récupérer les données envoyées dans le body de la requête
     const { id } = req.params;
+    const { name, price } = req.body;
 
     try {
 
@@ -148,7 +141,7 @@ productRoutes.patch("/update/:id", async (req, res) => {
             return res.status(400).send('L\'ID doit être un nombre valide');
         }
 
-        //Rechercher l'user par son id
+        //Rechercher le product par son id
         const product = await prisma.product.findUnique({
             where: {
                 id: productId,
@@ -156,14 +149,14 @@ productRoutes.patch("/update/:id", async (req, res) => {
         });
 
         if (product) {
-            // Update l'utilisateur en base de données
+            // Update le product en base de données
             const udpatedProduct = await prisma.product.update({
                 where: {
                     id: product?.id,
                 },
                 data: {
-                name: product.name.toString(),
-                price: product.price,
+                name: name.toString(),
+                price: price,
                 },
             });
 
@@ -181,11 +174,6 @@ productRoutes.patch("/update/:id", async (req, res) => {
 
         //Logger l'erreur
         console.log(error);
-
-        //Conditionné la réponse
-        // if (error.code === 11000) {
-        //     return res.status(409).send('Email address is already in use.');
-        // }
 
         return res.status(500).send('Erreur lors de l\'enregistrement en base');
 

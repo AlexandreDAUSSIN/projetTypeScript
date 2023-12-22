@@ -18,6 +18,7 @@ const express_1 = __importDefault(require("express"));
 const express_rate_limit_1 = require("express-rate-limit");
 const api_js_1 = __importDefault(require("./routes/api.js"));
 require("dotenv/config");
+require("./utils/passport");
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const limiter = (0, express_rate_limit_1.rateLimit)({

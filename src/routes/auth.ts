@@ -6,7 +6,7 @@ import prisma from "../utils/database";
 const router = express.Router();
 
 router.post("/signIn", async function (req, res) {
-const { email, password } = req.body;
+  const { email, password } = req.body;
   try {
     const user = await prisma.user.findUnique({
         where: {
@@ -33,5 +33,39 @@ const { email, password } = req.body;
     res.json({ error: e });
   }
 });
+
+router.post("/signUp", async function (req, res) {
+  const { email, password, name } = req.body;
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await prisma.user.create({
+      data: {
+        email: email,
+        password: hashedPassword,
+        name: name,
+      },
+    });
+
+    const token = jwt.sign({ user: newUser }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    res.json({ token });
+  } catch (e) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 export default router;

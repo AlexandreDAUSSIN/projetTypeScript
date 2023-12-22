@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const user_1 = __importDefault(require("./user"));
 const product_1 = __importDefault(require("./product"));
+const auth_1 = __importDefault(require("./auth"));
 const passport_1 = __importDefault(require("passport"));
 //Définir le routeur
 const router = express_1.default.Router();
@@ -13,6 +14,7 @@ const router = express_1.default.Router();
 router.get("/", (req, res) => {
     res.status(200).send('Bienvenue sur mon API !');
 });
+router.use("/auth", auth_1.default);
 router.use("/user", user_1.default);
 router.use("/product", passport_1.default.authenticate("jwt", { session: false }), product_1.default);
 //Exporter le routeur

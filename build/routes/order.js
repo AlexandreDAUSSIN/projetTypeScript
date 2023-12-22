@@ -13,20 +13,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const user_1 = require("../classes/user");
 const database_1 = __importDefault(require("../utils/database"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
 // Définir le router
-const userRoutes = express_1.default.Router();
+const orderRoutes = express_1.default.Router();
 //Définir les différentes routes
-userRoutes.post("/add", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+orderRoutes.post("/add", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //Récupérer les données envoyées dans le body de la requête
     const { email, name, password } = req.body;
     try {
         //Crypter le mot de passe
-        const encryptedPassword = yield bcrypt_1.default.hash(password, 10);
+        const encryptedPassword = yield bcrypt.hash(password, 10);
         //Créer l'utilisateur
-        const newUser = new user_1.User(email, name, encryptedPassword);
+        const newUser = new User(email, name, encryptedPassword);
         // Ajouter l'utilisateur en base de données
         yield database_1.default.user.create({
             data: {
@@ -48,7 +46,7 @@ userRoutes.post("/add", (req, res) => __awaiter(void 0, void 0, void 0, function
         return res.status(500).send('Erreur lors de l\'enregistrement en base');
     }
 }));
-userRoutes.delete("/delete/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+orderRoutes.delete("/delete/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //Récupérer les données envoyées dans le body de la requête
     const { id } = req.params;
     try {
@@ -85,7 +83,7 @@ userRoutes.delete("/delete/:id", (req, res) => __awaiter(void 0, void 0, void 0,
         res.status(500).send('Error during user registration');
     }
 }));
-userRoutes.get("/all", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+orderRoutes.get("/all", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield database_1.default.user.findMany();
         //Retourner une réponse
@@ -97,7 +95,7 @@ userRoutes.get("/all", (req, res) => __awaiter(void 0, void 0, void 0, function*
         return res.status(500).send('Erreur pendant la récupération dse users');
     }
 }));
-userRoutes.get("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+orderRoutes.get("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //Récupérer les données envoyées dans les paramètres url de la requête
     const { id } = req.params;
     try {
@@ -123,7 +121,7 @@ userRoutes.get("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function*
         res.status(500).send('Erreur pendant la récupération de l\'user');
     }
 }));
-userRoutes.put("/update/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+orderRoutes.put("/update/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //Récupérer les données envoyées dans le body de la requête
     const { id } = req.params;
     const { email, name, password } = req.body;
@@ -131,7 +129,7 @@ userRoutes.put("/update/:id", (req, res) => __awaiter(void 0, void 0, void 0, fu
         // Convertir l'id de l'url en nombre
         const userId = parseInt(id, 10);
         //Crypter le mot de passe
-        const encryptedPassword = yield bcrypt_1.default.hash(password, 10);
+        const encryptedPassword = yield bcrypt.hash(password, 10);
         // Vérifier si userId est un nombre valide
         if (isNaN(userId)) {
             return res.status(400).send('L\'ID doit être un nombre valide');
@@ -172,4 +170,4 @@ userRoutes.put("/update/:id", (req, res) => __awaiter(void 0, void 0, void 0, fu
         return res.status(500).send('Erreur lors de l\'enregistrement en base');
     }
 }));
-exports.default = userRoutes;
+exports.default = orderRoutes;
